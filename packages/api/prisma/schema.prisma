@@ -1,0 +1,110 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+generator prismaClassGenerator {
+  provider = "prisma-class-generator"
+  dryRun   = false
+  output   = "../src/_models/prisma-class"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+/// Tabela relacionada apenas ao dados de autenticação, para dados pessoais usar a tabela UserProfile
+model User {
+  id                Int                 @id @default(autoincrement())
+  email             String              @unique
+  phone             String?             @unique
+  password          String              @db.VarChar(2048)
+  isActive          Boolean             @default(true)
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  deletedAt         DateTime?
+  profile           UserProfile?
+  accessProfileUser AccessProfileUser[]
+
+  @@map("user")
+}
+
+model UserProfile {
+  id        Int     @id @default(autoincrement())
+  user      User    @relation(fields: [userId], references: [id])
+  userId    Int     @unique
+  firstName String?
+  lastName  String?
+  cpf       String?
+  state     String?
+  zipCode   String?
+  city      String?
+  address   String?
+  about     String? @db.VarChar(512)
+
+  avatarImg String? @default("default_avatar.jpg")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("user_profile")
+}
+
+// Tabelas relacionadas as permissões de usuários
+model Permission {
+  id                Int                 @id @default(autoincrement())
+  name              String              @unique
+  description       String
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  deletedAt         DateTime?
+  permissionProfile PermissionProfile[]
+
+  @@map("permission")
+}
+
+model PermissionProfile {
+  id              Int            @id @default(autoincrement())
+  permission      Permission?    @relation(fields: [permissionId], references: [id])
+  permissionId    Int
+  accessProfile   AccessProfile? @relation(fields: [accessProfileId], references: [id])
+  accessProfileId Int
+  create          Boolean?
+  update          Boolean?
+  read            Boolean?
+  delete          Boolean?
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  deletedAt       DateTime?
+
+  @@map("permission_profile")
+}
+
+model AccessProfile {
+  id                Int                 @id @default(autoincrement())
+  name              String              @unique
+  description       String
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  deletedAt         DateTime?
+  accessProfileUser AccessProfileUser[]
+  permissionProfile PermissionProfile[]
+
+  @@map("access_profile")
+}
+
+model AccessProfileUser {
+  id              Int            @id @default(autoincrement())
+  accessProfile   AccessProfile? @relation(fields: [accessProfileId], references: [id])
+  accessProfileId Int
+  user            User?          @relation(fields: [userId], references: [id])
+  userId          Int
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  deletedAt       DateTime?
+
+  @@map("access_profile_user")
+}
