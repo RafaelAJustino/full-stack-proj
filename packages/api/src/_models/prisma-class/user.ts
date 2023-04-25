@@ -1,6 +1,6 @@
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { UserProfile } from './user_profile';
 import { AccessProfileUser } from './access_profile_user';
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class User {
   @ApiProperty({ type: Number })
@@ -16,7 +16,7 @@ export class User {
   password: string = undefined;
 
   @ApiProperty({ type: Boolean })
-  isActive: boolean = true;
+  isActive = true;
 
   @ApiProperty({ type: Date })
   createdAt: Date = undefined;

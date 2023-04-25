@@ -1,6 +1,6 @@
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { AccessProfile } from './access_profile';
 import { User } from './user';
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class AccessProfileUser {
   @ApiProperty({ type: Number })

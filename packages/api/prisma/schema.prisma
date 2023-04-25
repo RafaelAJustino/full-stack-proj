@@ -34,7 +34,7 @@ model User {
 
 model UserProfile {
   id        Int     @id @default(autoincrement())
-  user      User    @relation(fields: [userId], references: [id])
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId    Int     @unique
   firstName String?
   lastName  String?
@@ -68,9 +68,9 @@ model Permission {
 
 model PermissionProfile {
   id              Int            @id @default(autoincrement())
-  permission      Permission?    @relation(fields: [permissionId], references: [id])
+  permission      Permission?    @relation(fields: [permissionId], references: [id], onDelete: Cascade)
   permissionId    Int
-  accessProfile   AccessProfile? @relation(fields: [accessProfileId], references: [id])
+  accessProfile   AccessProfile? @relation(fields: [accessProfileId], references: [id], onDelete: Cascade)
   accessProfileId Int
   create          Boolean?
   update          Boolean?
@@ -98,9 +98,9 @@ model AccessProfile {
 
 model AccessProfileUser {
   id              Int            @id @default(autoincrement())
-  accessProfile   AccessProfile? @relation(fields: [accessProfileId], references: [id])
+  accessProfile   AccessProfile? @relation(fields: [accessProfileId], references: [id], onDelete: Cascade)
   accessProfileId Int
-  user            User?          @relation(fields: [userId], references: [id])
+  user            User?          @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId          Int
   createdAt       DateTime       @default(now())
   updatedAt       DateTime       @updatedAt
