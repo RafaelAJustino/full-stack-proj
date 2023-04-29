@@ -133,7 +133,7 @@ function NavBar() {
                   </Link>
                 )}
 
-                {getPermissionUser?.user?.read && (
+                {getPermissionUser?.proposal?.read && (
                   <Link to={'/proposals'}>
                     <Grid sx={{ display: 'flex', gap: '10px' }}>
                       <InventoryIcon color={window.location.href.includes('proposals') ? 'secondary' : 'primary'} />
@@ -161,10 +161,10 @@ function NavBar() {
                 )}
 
                 {getPermissionUser?.user?.read && (
-                  <Link to={'/admins'}>
+                  <Link to={'/users'}>
                     <Grid sx={{ display: 'flex', gap: '10px' }}>
-                      <ManageAccountsIcon color={window.location.href.includes('admin') ? 'secondary' : 'primary'} />
-                      <Typography color={window.location.href.includes('admin') ? 'secondary' : 'primary'}>Administradores</Typography>
+                      <ManageAccountsIcon color={window.location.href.includes('user') ? 'secondary' : 'primary'} />
+                      <Typography color={window.location.href.includes('user') ? 'secondary' : 'primary'}>Administradores</Typography>
                     </Grid>
                   </Link>
                 )}

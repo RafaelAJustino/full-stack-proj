@@ -4,14 +4,11 @@ import {
     useTheme,
     TableHead,
     TableRow,
-    TableCell,
     TableSortLabel,
     TableContainer,
     Table,
     TableBody,
-    TablePagination,
     Typography,
-    Button,
     Divider,
     Stack,
     Pagination,
@@ -31,7 +28,6 @@ import Select from '@mui/material/Select/Select';
 import MenuItem from '@mui/material/MenuItem/MenuItem';
 import SearchIcon from '@mui/icons-material/Search';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
-import { getUser } from '../../../../utils/token';
 import { verifyAccess } from '../../../../utils/verifyAccess';
 
 function ListUserTemplate() {

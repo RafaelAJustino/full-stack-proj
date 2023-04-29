@@ -18,6 +18,12 @@ export async function verifyAccess() {
             read: false,
             update: false,
             delete: false,
+        },
+        proposal: {
+            create: false,
+            read: false,
+            update: false,
+            delete: false,
         }
     }
     try {
@@ -55,6 +61,20 @@ export async function verifyAccess() {
                     ),
                     delete: !!listAccess.some(
                         (a: any) => a?.permission?.name == 'USER' && a?.delete
+                    ),
+                },
+                proposal: {
+                    create: !!listAccess.some(
+                        (a: any) => a?.permission?.name == 'PROPOSAL' && a?.create
+                    ),
+                    read: !!listAccess.some(
+                        (a: any) => a?.permission?.name == 'PROPOSAL' && a?.read
+                    ),
+                    update: !!listAccess.some(
+                        (a: any) => a?.permission?.name == 'PROPOSAL' && a?.update
+                    ),
+                    delete: !!listAccess.some(
+                        (a: any) => a?.permission?.name == 'PROPOSAL' && a?.delete
                     ),
                 }
             }

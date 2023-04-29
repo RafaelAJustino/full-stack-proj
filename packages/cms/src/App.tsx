@@ -50,11 +50,11 @@ function App() {
           <Clients />
         </PrivateRoute>} />
         {/* )} */}
-        {/* {getPermissionUser?.user?.read && ( */}
+        {getPermissionUser?.proposal?.read && (
         <Route path='/proposals' element={<PrivateRoute redirectTo='/login'>
           <Proposals />
         </PrivateRoute>} />
-        {/* )} */}
+        )}
         {/* {getPermissionUser?.user?.read && ( */}
         <Route path='/contracts' element={<PrivateRoute redirectTo='/login'>
           <Contracts />
@@ -67,17 +67,17 @@ function App() {
         {/* )} */}
         <>
           {getPermissionUser?.user?.read && (
-            <Route path='/admins' element={<PrivateRoute redirectTo='/login'>
+            <Route path='/users' element={<PrivateRoute redirectTo='/login'>
               <ListUser />
             </PrivateRoute>} />
           )}
           {getPermissionUser?.user?.create && (
-            <Route path='/admins/new' element={<PrivateRoute redirectTo='/login'>
+            <Route path='/users/new' element={<PrivateRoute redirectTo='/login'>
               <NewUser />
             </PrivateRoute>} />
           )}
           {getPermissionUser?.user?.update && (
-            <Route path='/admins/edit/:id' element={<PrivateRoute redirectTo='/login'>
+            <Route path='/users/edit/:id' element={<PrivateRoute redirectTo='/login'>
               <EditUser />
             </PrivateRoute>} />
           )}
