@@ -12,14 +12,23 @@ import { AccessProfileService } from './services/accessProfile.service';
 import { AuthService } from './services/auth.service';
 import { PermissionService } from './services/permission.service';
 import { UserService } from './services/user.service';
+import { ProposalService } from './services/proposal.service';
+import { PublicProposalController } from './controllers/proposal.controller';
 
-const providers = [AuthService, UserService, PermissionService, AccessProfileService];
+const providers = [
+  AuthService,
+  UserService,
+  PermissionService,
+  AccessProfileService,
+  ProposalService,
+];
 const controllers = [
   PublicUserController,
   AuthController,
   UploadController,
   PermissionController,
   AccessProfileController,
+  PublicProposalController,
 ];
 
 @Module({
