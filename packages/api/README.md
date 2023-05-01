@@ -36,3 +36,16 @@ $ npm run test:e2e
 # test coverage
 $ npm run test:cov
 ```
+
+## Comads for database
+
+```bash
+# update dabase
+$ npm run db:push
+
+# update api dependences
+$ npm run db:generate
+
+# populate initial database
+$ npm run db:seed
+```
