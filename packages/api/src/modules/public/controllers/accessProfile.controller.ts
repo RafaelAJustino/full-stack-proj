@@ -54,7 +54,7 @@ export class AccessProfileController {
     description: 'Usuário não possui as permissões necessárias',
   })
   @UseGuards(RolesGuard)
-  @Roles(RolePermission.Permission, [RoleAction.READ])
+  // @Roles(rolePermission.Permission, [RoleAction.READ])
   @Get('list-all')
   async getListAll() {
     const permissions = await this.prismaService.accessProfile.findMany({
@@ -86,7 +86,7 @@ export class AccessProfileController {
     description: 'Usuário não possui as permissões necessárias',
   })
   @UseGuards(RolesGuard)
-  @Roles(RolePermission.Permission, [RoleAction.READ])
+  // @Roles(rolePermission.Permission, [RoleAction.READ])
   @Post('list')
   async getList(@Body() model: PaginatedDto) {
     const permissions = await this.prismaService.accessProfile.findMany({
@@ -131,7 +131,7 @@ export class AccessProfileController {
     description: 'Usuário não possui as permissões necessárias',
   })
   @UseGuards(RolesGuard)
-  @Roles(RolePermission.Permission, [RoleAction.READ])
+  // @Roles(rolePermission.Permission, [RoleAction.READ])
   @Get('list/:id')
   async getOnePermission(@Req() req: any) {
     const id = req.params.id;
@@ -167,7 +167,7 @@ export class AccessProfileController {
     description: 'Usuário não possui as permissões necessárias',
   })
   @UseGuards(RolesGuard)
-  @Roles(RolePermission.Permission, [RoleAction.READ])
+  // @Roles(rolePermission.Permission, [RoleAction.READ])
   @Get('count')
   async CountPermissions() {
     const users = await this.accesProfileService.count();
@@ -186,7 +186,7 @@ export class AccessProfileController {
     description: 'Usuário não possui as permissões necessárias',
   })
   @UseGuards(RolesGuard)
-  @Roles(RolePermission.Permission, [RoleAction.CREATE])
+  // @Roles(rolePermission.Permission, [RoleAction.CREATE])
   @Post('create')
   async createPermission(@Body() model: any) {
     return this.accesProfileService.createAccessProfile(model);
@@ -200,7 +200,7 @@ export class AccessProfileController {
     description: 'Dados atualizados com sucesso',
   })
   @UseGuards(RolesGuard)
-  @Roles(RolePermission.Permission, [RoleAction.UPDATE])
+  // @Roles(rolePermission.Permission, [RoleAction.UPDATE])
   async updatePermission(@Body() model: any) {
     await this.accesProfileService.updateAccessProfile(model);
   }
@@ -213,7 +213,7 @@ export class AccessProfileController {
     description: 'Permissão deletada com sucesso',
   })
   @UseGuards(RolesGuard)
-  @Roles(RolePermission.Permission, [RoleAction.DELETE])
+  // @Roles(rolePermission.Permission, [RoleAction.DELETE])
   async deletePermission(@Body() model: any) {
     await this.accesProfileService.deleteAccessProfile({ id: model.id });
   }

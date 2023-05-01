@@ -37,7 +37,7 @@ import { RoleAction } from '../../../roles/roleAction.enum';
 })
 @Throttle()
 @UseGuards(RolesGuard)
-@Roles(RolePermission.Permission, [RoleAction.READ])
+// @Roles(rolePermission.Permission, [RoleAction.READ])
 @ApiBearerAuth()
 export class PermissionController {
   constructor(
@@ -56,7 +56,7 @@ export class PermissionController {
     description: 'Usuário não possui as permissões necessárias',
   })
   @UseGuards(RolesGuard)
-  @Roles(RolePermission.Permission, [RoleAction.READ])
+  // @Roles(rolePermission.Permission, [RoleAction.READ])
   @Get('list-all')
   async getListAll() {
     const permissions = await this.prismaService.permission.findMany();
@@ -75,7 +75,7 @@ export class PermissionController {
     description: 'Usuário não possui as permissões necessárias',
   })
   @UseGuards(RolesGuard)
-  @Roles(RolePermission.Permission, [RoleAction.READ])
+  // @Roles(rolePermission.Permission, [RoleAction.READ])
   @Post('list')
   async getList(@Body() model: PaginatedDto) {
     const permissions = await this.prismaService.permission.findMany({
@@ -108,7 +108,7 @@ export class PermissionController {
     description: 'Usuário não possui as permissões necessárias',
   })
   @UseGuards(RolesGuard)
-  @Roles(RolePermission.Permission, [RoleAction.READ])
+  // @Roles(rolePermission.Permission, [RoleAction.READ])
   @Get('list/:id')
   async getOnePermission(@Req() req: any) {
     const id = req.params.id;
@@ -145,7 +145,7 @@ export class PermissionController {
     description: 'Usuário não possui as permissões necessárias',
   })
   @UseGuards(RolesGuard)
-  @Roles(RolePermission.Permission, [RoleAction.READ])
+  // @Roles(rolePermission.Permission, [RoleAction.READ])
   @Get('count')
   async CountPermissions() {
     const users = await this.permissionService.count();
@@ -164,7 +164,7 @@ export class PermissionController {
     description: 'Usuário não possui as permissões necessárias',
   })
   @UseGuards(RolesGuard)
-  @Roles(RolePermission.Permission, [RoleAction.CREATE])
+  // @Roles(rolePermission.Permission, [RoleAction.CREATE])
   @Post('create')
   async createPermission(@Body() model: any) {
     return this.permissionService.createPermission(model);
@@ -178,7 +178,7 @@ export class PermissionController {
     description: 'Dados atualizados com sucesso',
   })
   @UseGuards(RolesGuard)
-  @Roles(RolePermission.Permission, [RoleAction.UPDATE])
+  // @Roles(rolePermission.Permission, [RoleAction.UPDATE])
   async updatePermission(@Req() req: Request, @Body() model: any) {
     await this.permissionService.updatePermission(model);
   }
@@ -191,7 +191,7 @@ export class PermissionController {
     description: 'Permissão deletada com sucesso',
   })
   @UseGuards(RolesGuard)
-  @Roles(RolePermission.Permission, [RoleAction.DELETE])
+  // @Roles(rolePermission.Permission, [RoleAction.DELETE])
   async deletePermission(@Body() model: any) {
     await this.permissionService.deletePermission({ id: model.id });
   }
@@ -209,7 +209,7 @@ export class PermissionController {
     description: 'Usuário não possui as permissões necessárias',
   })
   @UseGuards(RolesGuard)
-  @Roles(RolePermission.Permission, [RoleAction.READ])
+  // @Roles(rolePermission.Permission, [RoleAction.READ])
   @Get('profile/list-all')
   async getListAllPermissionProfile() {
     const permissions = await this.prismaService.permissionProfile.findMany({
@@ -233,7 +233,7 @@ export class PermissionController {
     description: 'Usuário não possui as permissões necessárias',
   })
   @UseGuards(RolesGuard)
-  @Roles(RolePermission.Permission, [RoleAction.READ])
+  // @Roles(rolePermission.Permission, [RoleAction.READ])
   @Post('profile/list')
   async getListPermissionProfile(@Body() model: PaginatedDto) {
     const permissions = await this.prismaService.permissionProfile.findMany({
@@ -280,7 +280,7 @@ export class PermissionController {
     description: 'Usuário não possui as permissões necessárias',
   })
   @UseGuards(RolesGuard)
-  @Roles(RolePermission.Permission, [RoleAction.READ])
+  // @Roles(rolePermission.Permission, [RoleAction.READ])
   @Get('profile/list/:id')
   async getOnePermissionProfile(@Req() req: any) {
     const id = req.params.id;
@@ -308,7 +308,7 @@ export class PermissionController {
     description: 'Usuário não possui as permissões necessárias',
   })
   @UseGuards(RolesGuard)
-  @Roles(RolePermission.Permission, [RoleAction.READ])
+  // @Roles(rolePermission.Permission, [RoleAction.READ])
   @Get('profile/count')
   async CountPermissionProfile() {
     const users = await this.permissionService.countPermissionProfile();
@@ -327,7 +327,7 @@ export class PermissionController {
     description: 'Usuário não possui as permissões necessárias',
   })
   @UseGuards(RolesGuard)
-  @Roles(RolePermission.Permission, [RoleAction.CREATE])
+  // @Roles(rolePermission.Permission, [RoleAction.CREATE])
   @Post('profile/create')
   async createPermissionProfile(@Body() model: any) {
     return this.permissionService.createPermissionProfile(model);
@@ -341,7 +341,7 @@ export class PermissionController {
     description: 'Dados atualizados com sucesso',
   })
   @UseGuards(RolesGuard)
-  @Roles(RolePermission.Permission, [RoleAction.UPDATE])
+  // @Roles(rolePermission.Permission, [RoleAction.UPDATE])
   async updatePermissionProfile(@Req() req: Request, @Body() model: any) {
     await this.permissionService.updatePermissionProfile(model);
   }
@@ -354,7 +354,7 @@ export class PermissionController {
     description: 'Permissão deletada com sucesso',
   })
   @UseGuards(RolesGuard)
-  @Roles(RolePermission.Permission, [RoleAction.DELETE])
+  // @Roles(rolePermission.Permission, [RoleAction.DELETE])
   async deletePermissionProfile(@Body() model: any) {
     await this.permissionService.deletePermissionProfile({ id: model.id });
   }

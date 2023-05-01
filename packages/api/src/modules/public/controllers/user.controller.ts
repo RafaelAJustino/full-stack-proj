@@ -71,7 +71,7 @@ export class PublicUserController {
     description: 'Usuário não possui as permissões necessárias',
   })
   @UseGuards(RolesGuard)
-  @Roles(RolePermission.User, [RoleAction.CREATE])
+  // @Roles(rolePermission.User, [RoleAction.CREATE])
   @Post('create')
   async createUserProfile(@Body() model: UpdateUserProfileDto) {
     return this.userService.createProfile(model);
@@ -85,7 +85,7 @@ export class PublicUserController {
     description: 'Dados atualizados com sucesso',
   })
   @UseGuards(RolesGuard)
-  @Roles(RolePermission.User, [RoleAction.UPDATE])
+  // @Roles(rolePermission.User, [RoleAction.UPDATE])
   async updateUser(@Body() model: UpdateUserDto) {
     await this.userService.update(model, model.id);
   }
@@ -98,7 +98,7 @@ export class PublicUserController {
     description: 'Dados atualizados com sucesso',
   })
   @UseGuards(RolesGuard)
-  @Roles(RolePermission.User, [RoleAction.UPDATE])
+  // @Roles(rolePermission.User, [RoleAction.UPDATE])
   async updateUserStatus(@Body() model: UpdateUserDto) {
     await this.userService.updateStatus(model, model.id);
   }
@@ -114,7 +114,7 @@ export class PublicUserController {
     description: 'Usuário não possui as permissões necessárias',
   })
   @UseGuards(RolesGuard)
-  @Roles(RolePermission.User, [RoleAction.READ])
+  // @Roles(rolePermission.User, [RoleAction.READ])
   @Post('list')
   async getList(@Body() model: PaginatedDto) {
     const users = await this.prismaService.user.findMany({
@@ -168,7 +168,7 @@ export class PublicUserController {
     description: 'Usuário não possui as permissões necessárias',
   })
   @UseGuards(RolesGuard)
-  @Roles(RolePermission.User, [RoleAction.READ])
+  // @Roles(rolePermission.User, [RoleAction.READ])
   @Get('list/:id')
   async getOneProfile(@Req() req: any) {
     const users = await this.userService.findOne({
@@ -205,7 +205,7 @@ export class PublicUserController {
     description: 'Usuário deletado com sucesso',
   })
   @UseGuards(RolesGuard)
-  @Roles(RolePermission.User, [RoleAction.DELETE])
+  // @Roles(rolePermission.User, [RoleAction.DELETE])
   async delteUser(@Body() model: any) {
     await this.userService.delete({ id: model.id }, model.id);
   }

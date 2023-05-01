@@ -53,7 +53,7 @@ export class PublicProposalController {
     description: 'Proposta atualizados com sucesso',
   })
   @UseGuards(RolesGuard)
-  @Roles(RolePermission.Proposal, [RoleAction.UPDATE])
+  // @Roles(rolePermission.Proposal, [RoleAction.UPDATE])
   async updateProposal(@Body() model: ProposalDto) {
     await this.proposalService.update(model, model.id);
   }
@@ -69,7 +69,7 @@ export class PublicProposalController {
     description: 'Usuário não possui as permissões necessárias',
   })
   @UseGuards(RolesGuard)
-  @Roles(RolePermission.Proposal, [RoleAction.READ])
+  // @Roles(rolePermission.Proposal, [RoleAction.READ])
   @Post('list')
   async getList(@Body() model: PaginatedDto) {
     const proposals = await this.prismaService.proposal.findMany({
@@ -130,7 +130,7 @@ export class PublicProposalController {
     description: 'Usuário não possui as permissões necessárias',
   })
   @UseGuards(RolesGuard)
-  @Roles(RolePermission.Proposal, [RoleAction.READ])
+  // @Roles(rolePermission.Proposal, [RoleAction.READ])
   @Get('list/:id')
   async getOneProposal(@Req() req: any) {
     const proposals = await this.proposalService.findOne({
@@ -154,7 +154,7 @@ export class PublicProposalController {
     description: 'Usuário não possui as permissões necessárias',
   })
   @UseGuards(RolesGuard)
-  //   @Roles(RolePermission.Proposal, [RoleAction.CREATE])
+  // @Roles(rolePermission.Proposal, [RoleAction.CREATE])
   @Post('create')
   async createUserProfile(@Body() model: ProposalDto) {
     return this.proposalService.create(model, model.clientId);
@@ -168,7 +168,7 @@ export class PublicProposalController {
     description: 'Usuário deletado com sucesso',
   })
   @UseGuards(RolesGuard)
-  @Roles(RolePermission.Proposal, [RoleAction.DELETE])
+  // @Roles(rolePermission.Proposal, [RoleAction.DELETE])
   async delteProposal(@Body() model: any) {
     await this.proposalService.delete({ id: model.id });
   }
