@@ -122,10 +122,10 @@ function ProposalRowTemplate({
           <S.ProposalRowGridModal>
             <Grid>
               <Typography variant={'h4'} style={{ fontWeight: 'bold' }}>
-                Excluir Usuário?
+                Excluir Proposta?
               </Typography>
               <Typography style={{ marginBottom: 30 }}>
-                Deseja mesmo excluir este usuário? Esta ação é Irreversível!
+                Deseja mesmo excluir esta proposta? Esta ação é Irreversível!
               </Typography>
             </Grid>
             <Grid display={'flex'} justifyContent={'space-between'} width={'100%'}>

@@ -56,7 +56,7 @@ export class ProposalService {
 
     return this.prisma.proposal.update({
       where: {
-        id: clientId,
+        id: model.id,
       },
       data: model,
     });
