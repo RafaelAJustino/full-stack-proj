@@ -69,7 +69,7 @@ function NavBar() {
       }
     }
     fetchData();
-  }, [])
+  }, [getJwtToken() ])
 
   return (
     <>

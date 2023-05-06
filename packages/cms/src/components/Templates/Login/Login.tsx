@@ -45,8 +45,6 @@ function LoginTemplate() {
 
     const submitRequest = useCallback(
         (values: typeof initialValues) => {
-
-
             const doLogin = async () => {
                 try {
                     setError(false);
@@ -55,8 +53,8 @@ function LoginTemplate() {
                     const user = await AuthUser(values);
                     setJwtToken(user.token);
                     setUser(JSON.stringify({id: user.id}))
-                    window.location.reload();
                     navigate('/');
+                    window.location.reload();
                 } catch (e: any) {
                     if (e.response.data.message == 'AUTH.UNAUTHORIZED') {
                         setError(true)

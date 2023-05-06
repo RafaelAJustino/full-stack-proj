@@ -23,7 +23,7 @@ import * as Yup from 'yup';
 import { AuthRegister, AuthUser } from '../../../services/auth';
 import LoadingButton from '@mui/lab/LoadingButton';
 import FormHelperText from '@mui/material/FormHelperText';
-import { setJwtToken } from '../../../utils/token';
+import { setJwtToken, setUser } from '../../../utils/token';
 
 const initialValues = {
     email: '',
@@ -71,7 +71,9 @@ function AuthRegisterTemplate() {
                             password: values.password,
                         })
                         setJwtToken(user.token);
+                        setUser(JSON.stringify({ id: user.id }))
                         navigate('/');
+                        window.location.reload();
                     }
                 } catch (e: any) {
                     console.log(e.response.data.message);

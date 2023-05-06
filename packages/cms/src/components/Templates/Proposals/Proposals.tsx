@@ -71,7 +71,7 @@ function ProposalsTemplate() {
   const [search, setSearch] = useState("");
   const [getPermissionUser, setPermissionUser] = useState<any>();
   const [showModal, setShowModal] = useState(false);
-  const [actionModal, setActionModal] = useState("Criar");
+  const [actionModal, setActionModal] = useState<string>("");
   const [listClient, setListClient] = useState<any>([
     {
       id: 1,
@@ -94,14 +94,15 @@ function ProposalsTemplate() {
         type: values.type,
         clientId: values.clientId,
       };
-
       const createUser = async () => {
         try {
           setLoading(true);
-          if (actionModal == "Criar") {
+          if (!values.id) {
             await CreateProposal(temp);
-          } else if (actionModal == "Editar") {
-            await UpdateProposal({...temp, id: values.id});
+            console.log(actionModal)
+          } else {
+            await UpdateProposal({ ...temp, id: values.id });
+            console.log(actionModal)
           }
           formik.values.name = "";
           formik.values.clientId = null;
@@ -145,13 +146,22 @@ function ProposalsTemplate() {
     }),
   });
 
-  const handleOpenModal = (action: string) => {
+  interface OpenModalInterface {
+    action: string;
+    row?: any;
+  }
+
+  const handleOpenModal = ({ action, row }: OpenModalInterface) => {
     setShowModal(true);
     if (action.toUpperCase() !== "EDITAR") {
       formik.values.name = "";
       formik.values.clientId = null;
+      formik.values.id = null
+    } else {
+      formik.values.name = row?.name;
+      formik.values.clientId = row?.client.id;
+      formik.values.id = row?.id;
     }
-    setActionModal(action);
   };
   const handleCloseModal = () => {
     setShowModal(false);
@@ -159,7 +169,7 @@ function ProposalsTemplate() {
     formik.values.clientId = null;
   };
 
-  async function handleOrder(entry: string) {}
+  async function handleOrder(entry: string) { }
 
   const handleDeleteProposal = async (id: number) => {
     if (listProposal) {
@@ -281,7 +291,9 @@ function ProposalsTemplate() {
               {getPermissionUser?.proposal?.create && (
                 <Tooltip title="Adicionar proposta" color="">
                   <IconButton
-                    onClick={() => handleOpenModal("Criar")}
+                    onClick={() => {
+                      handleOpenModal({ action: "Criar" });
+                    }}
                     edge="end"
                     size="large"
                     color="primary"
@@ -395,10 +407,10 @@ function ProposalsTemplate() {
                       </S.ListProposalTableCell>
                       {(getPermissionUser?.proposal?.update ||
                         getPermissionUser?.proposal?.delete) && (
-                        <S.ListProposalTableCell align={"center"}>
-                          Ações
-                        </S.ListProposalTableCell>
-                      )}
+                          <S.ListProposalTableCell align={"center"}>
+                            Ações
+                          </S.ListProposalTableCell>
+                        )}
                     </TableRow>
                   </TableHead>
                   <TableBody>
@@ -419,11 +431,7 @@ function ProposalsTemplate() {
                             handleDeleteProposal(row.id);
                           }}
                           onEdit={(val) => {
-                            handleOpenModal("Editar");
-                            console.log(val);
-                            formik.values.name = row?.name;
-                            formik.values.clientId = row?.client.id;
-                            formik.values.id = row?.id;
+                            handleOpenModal({action: "Editar", row});
                           }}
                         />
                       );
@@ -554,10 +562,10 @@ function ProposalsTemplate() {
                   {Boolean(
                     formik.touched.clientId && formik.errors.clientId
                   ) && (
-                    <FormHelperText error style={{ marginLeft: 0 }}>
-                      {formik.touched.clientId && formik.errors.clientId}
-                    </FormHelperText>
-                  )}
+                      <FormHelperText error style={{ marginLeft: 0 }}>
+                        {formik.touched.clientId && formik.errors.clientId}
+                      </FormHelperText>
+                    )}
                 </FormControl>
               </MyGrid>
               <LoadingButton
