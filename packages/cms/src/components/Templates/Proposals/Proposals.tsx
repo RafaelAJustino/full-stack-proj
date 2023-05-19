@@ -21,6 +21,7 @@ import {
   OutlinedInput,
   Select,
   InputAdornment,
+  Button,
 } from "@mui/material";
 import React, { useEffect, useState, useCallback } from "react";
 import * as S from "./Proposals.style";
@@ -42,10 +43,10 @@ import SearchIcon from "@mui/icons-material/Search";
 import { LoadingButton } from "@mui/lab";
 
 const initialValues = {
-  id: null,
+  id: 0,
   name: "",
   type: "Landing Page",
-  clientId: null,
+  clientId: 0,
 };
 
 const style = {
@@ -99,15 +100,10 @@ function ProposalsTemplate() {
           setLoading(true);
           if (!values.id) {
             await CreateProposal(temp);
-            console.log(actionModal)
           } else {
             await UpdateProposal({ ...temp, id: values.id });
-            console.log(actionModal)
           }
-          formik.values.name = "";
-          formik.values.clientId = null;
 
-          setLoading(true);
           const temp1 = await verifyAccess();
           const data = await ListProposal({
             page: page,
@@ -117,6 +113,9 @@ function ProposalsTemplate() {
           setPermissionUser(temp1);
           setListProposal(data.data);
           setCountProposal(data.total);
+          
+          formik.values.name = "";
+          formik.values.clientId = 0;
         } catch (e) {
           console.log(e);
         } finally {
@@ -155,8 +154,8 @@ function ProposalsTemplate() {
     setShowModal(true);
     if (action.toUpperCase() !== "EDITAR") {
       formik.values.name = "";
-      formik.values.clientId = null;
-      formik.values.id = null
+      formik.values.clientId = 0;
+      formik.values.id = 0
     } else {
       formik.values.name = row?.name;
       formik.values.clientId = row?.client.id;
@@ -166,7 +165,7 @@ function ProposalsTemplate() {
   const handleCloseModal = () => {
     setShowModal(false);
     formik.values.name = "";
-    formik.values.clientId = null;
+    formik.values.clientId = 0;
   };
 
   async function handleOrder(entry: string) { }
@@ -568,8 +567,8 @@ function ProposalsTemplate() {
                     )}
                 </FormControl>
               </MyGrid>
-              <LoadingButton
-                loading={loading}
+              <Button
+                disabled={loading}
                 type="submit"
                 variant="contained"
                 sx={{
@@ -577,7 +576,7 @@ function ProposalsTemplate() {
                 }}
               >
                 {`${actionModal} proposta`}
-              </LoadingButton>
+              </Button>
             </Grid>
           </Grid>
         </form>
