@@ -18,10 +18,23 @@ import NewAccessProfile from '../src/components/Templates/AccessProfile/NewAcces
 import { getUser } from './utils/token';
 import { useEffect, useState } from 'react';
 import { verifyAccess } from './utils/verifyAccess';
+import { Alert, Snackbar } from '@mui/material';
+import { socket } from './socket';
 
 function App() {
   const [getPermissionUser, setPermissionUser] = useState<any>();
+  const [open, setOpen] = useState<boolean>(false);
   // let getPermissionUser: any = {};
+
+  const [socketInstance] = useState(socket());
+
+  const handleOpen = () => () => {
+    setOpen(true);
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+  };
 
   useEffect(() => {
     async function fetchData() {
@@ -33,6 +46,12 @@ function App() {
       }
     }
     fetchData();
+  }, [])
+
+  useEffect(() => {
+    socketInstance.on('proposal', () => {
+      setOpen(true);
+    })
   }, [])
 
   return (
@@ -51,9 +70,9 @@ function App() {
         </PrivateRoute>} />
         {/* )} */}
         {getPermissionUser?.proposal?.read && (
-        <Route path='/proposals' element={<PrivateRoute redirectTo='/login'>
-          <Proposals />
-        </PrivateRoute>} />
+          <Route path='/proposals' element={<PrivateRoute redirectTo='/login'>
+            <Proposals />
+          </PrivateRoute>} />
         )}
         {/* {getPermissionUser?.user?.read && ( */}
         <Route path='/contracts' element={<PrivateRoute redirectTo='/login'>
@@ -100,6 +119,19 @@ function App() {
           )}
         </>
       </Routes>
+      <Snackbar
+        anchorOrigin={{
+          vertical: 'bottom',
+          horizontal: 'left',
+        }}
+        autoHideDuration={6000}
+        open={open}
+        onClose={handleClose}
+        message="I love snacks"
+        key={'bottom' + 'left'}
+      >
+        <Alert severity="info">Houve uma atualização em PROPOSTAS</Alert>
+      </Snackbar>
     </>
   )
 }

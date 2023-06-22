@@ -38,7 +38,7 @@ function LoginTemplate() {
     const [message, setMessage] = useState('');
 
     useEffect(() => {
-        if (!loading && getJwtToken() !== null) {
+        if (!loading && !!getJwtToken()) {
             navigate('/')
         }
     }, [loading, navigate])

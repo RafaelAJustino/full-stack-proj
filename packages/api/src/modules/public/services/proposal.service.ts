@@ -27,7 +27,6 @@ export class ProposalService {
   }
 
   async create(data: Prisma.ProposalCreateInput, clientId: number): Promise<Proposal> {
-    console.log('PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP', clientId);
     return this.prisma.proposal.create({
       data: {
         name: data.name,

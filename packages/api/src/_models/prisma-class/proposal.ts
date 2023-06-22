@@ -1,5 +1,5 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Client } from './client';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class Proposal {
   @ApiProperty({ type: Number })
@@ -15,7 +15,7 @@ export class Proposal {
   name: string = undefined;
 
   @ApiProperty({ type: String })
-  type = 'LANDING_PAGE';
+  type: string = 'LANDING_PAGE';
 
   @ApiProperty({ type: Date })
   createdAt: Date = undefined;

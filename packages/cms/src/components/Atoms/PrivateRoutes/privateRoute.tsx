@@ -3,7 +3,7 @@ import {  Navigate } from 'react-router-dom';
 import { getJwtToken } from '../../../utils/token';
 
 function PrivateRoute({ children, redirectTo }: any) {
-    const isAuthenticated = getJwtToken() !== null;
+    const isAuthenticated = !!getJwtToken();
 
     return (
         isAuthenticated ? children : <Navigate to={redirectTo} />

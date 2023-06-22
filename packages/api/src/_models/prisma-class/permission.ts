@@ -1,5 +1,5 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { PermissionProfile } from './permission_profile';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class Permission {
   @ApiProperty({ type: Number })

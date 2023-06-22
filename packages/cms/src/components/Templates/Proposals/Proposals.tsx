@@ -22,6 +22,8 @@ import {
   Select,
   InputAdornment,
   Button,
+  Snackbar,
+  Alert,
 } from "@mui/material";
 import React, { useEffect, useState, useCallback } from "react";
 import * as S from "./Proposals.style";
@@ -41,6 +43,7 @@ import {
 import AddIcon from "@mui/icons-material/Add";
 import SearchIcon from "@mui/icons-material/Search";
 import { LoadingButton } from "@mui/lab";
+import { socket } from "../../../socket";
 
 const initialValues = {
   id: 0,
@@ -64,6 +67,7 @@ const style = {
 
 function ProposalsTemplate() {
   const navigate = useNavigate();
+  const [socketInstance] = useState(socket());
   const [loading, setLoading] = useState(false);
   const [listProposal, setListProposal] = useState<any>([]);
   const [countProposal, setCountProposal] = useState<any>(-1);
@@ -87,6 +91,10 @@ function ProposalsTemplate() {
       createdAt: "2023-04-29 13:49:23.557",
     },
   ]);
+
+  const handleSubmit = () => {
+    socketInstance.emit('proposal');
+  };
 
   const submitRequest = useCallback(
     (values: typeof initialValues) => {
@@ -113,7 +121,9 @@ function ProposalsTemplate() {
           setPermissionUser(temp1);
           setListProposal(data.data);
           setCountProposal(data.total);
-          
+
+          handleSubmit();
+
           formik.values.name = "";
           formik.values.clientId = 0;
         } catch (e) {
@@ -428,9 +438,10 @@ function ProposalsTemplate() {
                           createdAt={row.createdAt}
                           onDelete={() => {
                             handleDeleteProposal(row.id);
+                            handleSubmit();
                           }}
                           onEdit={(val) => {
-                            handleOpenModal({action: "Editar", row});
+                            handleOpenModal({ action: "Editar", row });
                           }}
                         />
                       );

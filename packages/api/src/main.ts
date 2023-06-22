@@ -1,4 +1,5 @@
 import { join } from 'path';
+import * as http from 'http';
 import { ValidationPipe, VersioningType } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
@@ -8,6 +9,7 @@ import basicAuth from 'express-basic-auth';
 import helmet from 'helmet';
 import express from 'express';
 import { Logger } from 'nestjs-pino';
+import { Server as socketio } from 'socket.io';
 import { AppModule } from './app.module';
 import { API_VERSION_HEADER, IGNORED_SENTRY_ERRORS } from './utils/consts';
 import { PrismaModel } from './_models/prisma-class';
@@ -72,10 +74,31 @@ async function bootstrap() {
 
   SwaggerModule.setup(swaggerPath, app, document);
 
-  const port = process.env.PORT || 3000;
+  const server = http.createServer(app.getHttpAdapter().getInstance());
+  const io = new socketio(server, {
+    cors: {
+      origin: '*',
+    },
+  });
+  // const io = new Server();
+
+  io.on('connection', (socket) => {
+    socket.on('disconnect', () => {
+      console.log('Socket disconnected:', socket.id);
+    });
+
+    socket.on('proposal', () => {
+      io.emit('proposal');
+    });
+  });
+
+  const port = process.env.PORT || 8000;
   await app.listen(port);
 
-  console.log(`Started with env ${process.env.APP_ENV} at http://localhost:${port}`);
+  const socketPort = process.env.SOCKET_PORT || 8080;
+  server.listen(socketPort, async () => {
+    console.log(`Started with env ${process.env.APP_ENV} at http://localhost:${port}`);
+  });
 }
 
 bootstrap();

@@ -4,7 +4,7 @@ import { deleteJwtToken } from "./token";
 import { getUser } from "./token";
 
 export async function verifyAccess() {
-    const isAuthenticated = getJwtToken() !== null;
+    const isAuthenticated = !!getJwtToken();
 
     let access = {
         permission: {

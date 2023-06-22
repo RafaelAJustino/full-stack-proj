@@ -138,8 +138,6 @@ export class AuthService {
         },
       },
     });
-
-    console.log('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx', user);
     if (!user?.isActive) return null;
     if (user) return user;
     return null;

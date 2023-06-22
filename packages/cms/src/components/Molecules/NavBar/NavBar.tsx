@@ -69,11 +69,11 @@ function NavBar() {
       }
     }
     fetchData();
-  }, [getJwtToken() ])
+  }, [])
 
   return (
     <>
-      {!!(getJwtToken() !== null) && !!(getPermissionUser) && (
+      {!!getJwtToken() && !!(getPermissionUser) && (
         <>
           <AppBar position='static'>
             <Toolbar>
