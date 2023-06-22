@@ -24,6 +24,7 @@ import { Roles } from '../../../roles/role.decorator';
 import { RolePermission } from '../../../roles/rolePermission.enum';
 import { RoleAction } from '../../../roles/roleAction.enum';
 import { RolesGuard } from '../../../roles/role.guard';
+import { RedisService } from '../../../config/redis';
 
 @ApiTags('Usuário')
 @ApiHeader({
@@ -46,6 +47,7 @@ export class PublicUserController {
   constructor(
     private readonly prismaService: PrismaService,
     private readonly userService: UserService,
+    private readonly redis: RedisService,
   ) {}
 
   @ApiOperation({
@@ -100,6 +102,7 @@ export class PublicUserController {
   @UseGuards(RolesGuard)
   // @Roles(rolePermission.User, [RoleAction.UPDATE])
   async updateUserStatus(@Body() model: UpdateUserDto) {
+    await this.redis.del(`user/${model.id}`);
     await this.userService.updateStatus(model, model.id);
   }
 
@@ -171,30 +174,38 @@ export class PublicUserController {
   // @Roles(rolePermission.User, [RoleAction.READ])
   @Get('list/:id')
   async getOneProfile(@Req() req: any) {
-    const users = await this.userService.findOne({
-      where: { id: parseInt(req.params.id) },
-      include: {
-        profile: true,
-        accessProfileUser: {
-          include: {
-            accessProfile: {
-              include: {
-                permissionProfile: {
-                  include: {
-                    permission: true,
+    const cachedUser = await this.redis.get(`user/${req.params.id}`);
+
+    if (!cachedUser) {
+      const user = await this.userService.findOne({
+        where: { id: parseInt(req.params.id) },
+        include: {
+          profile: true,
+          accessProfileUser: {
+            include: {
+              accessProfile: {
+                include: {
+                  permissionProfile: {
+                    include: {
+                      permission: true,
+                    },
                   },
                 },
               },
             },
           },
         },
-      },
-    });
+      });
 
-    delete users.password;
-    delete users.UserPermission;
+      delete user.password;
+      delete user.UserPermission;
 
-    return users;
+      await this.redis.set(`user/${req.params.id}`, JSON.stringify(user));
+
+      return user;
+    }
+
+    return JSON.parse(cachedUser);
   }
 
   @Put('delete')
@@ -207,6 +218,7 @@ export class PublicUserController {
   @UseGuards(RolesGuard)
   // @Roles(rolePermission.User, [RoleAction.DELETE])
   async delteUser(@Body() model: any) {
+    await this.redis.del(`user/${model.id}`);
     await this.userService.delete({ id: model.id }, model.id);
   }
 }
