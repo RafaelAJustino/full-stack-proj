@@ -2,6 +2,7 @@ import { MiddlewareConsumer, Module, NestModule, RequestMethod } from '@nestjs/c
 import { APP_GUARD } from '@nestjs/core';
 import JWTMiddleware from '../../middlewares/jwt.middleware';
 import { ExternalModule } from '../external/external.module';
+import { RedisService } from '../../config/redis';
 import { AccessProfileController } from './controllers/accessProfile.controller';
 import { AuthController } from './controllers/auth.controller';
 import { PermissionController } from './controllers/permission.controller';
@@ -21,6 +22,7 @@ const providers = [
   PermissionService,
   AccessProfileService,
   ProposalService,
+  RedisService,
 ];
 const controllers = [
   PublicUserController,
