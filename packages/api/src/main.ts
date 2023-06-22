@@ -89,6 +89,7 @@ async function bootstrap() {
 
     socket.on('proposal', () => {
       io.emit('proposal');
+      // socket.broadcast.emit('proposal');
     });
   });
 

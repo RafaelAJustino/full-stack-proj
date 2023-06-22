@@ -52,6 +52,10 @@ function App() {
     socketInstance.on('proposal', () => {
       setOpen(true);
     })
+
+    return () => {
+      socketInstance.off('proposal');
+    }
   }, [])
 
   return (
