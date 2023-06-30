@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { join } from 'path';
 import * as http from 'http';
 import { ValidationPipe, VersioningType } from '@nestjs/common';
@@ -10,6 +11,7 @@ import helmet from 'helmet';
 import express from 'express';
 import { Logger } from 'nestjs-pino';
 import { Server as socketio } from 'socket.io';
+import * as jwt from 'jsonwebtoken';
 import { AppModule } from './app.module';
 import { API_VERSION_HEADER, IGNORED_SENTRY_ERRORS } from './utils/consts';
 import { PrismaModel } from './_models/prisma-class';
@@ -18,6 +20,19 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
     bufferLogs: true,
   });
+
+  const verifyTokenMiddleware = async (socket, next: (err?: any) => void) => {
+    const token = socket.handshake.auth.token; // Obtém o token do handshake
+    const key = process.env.JWT_KEY;
+
+    try {
+      // Verifica o token usando a mesma lógica de verificação usada no servidor HTTP
+      jwt.verify(token, key);
+      next(); // Chama o próximo middleware ou rota
+    } catch (error) {
+      next(new Error('Token inválido')); // Retorna um erro caso o token seja inválido
+    }
+  };
 
   app.useLogger(app.get(Logger));
   app.useGlobalPipes(new ValidationPipe());
@@ -82,12 +97,17 @@ async function bootstrap() {
   });
   // const io = new Server();
 
+  io.use(verifyTokenMiddleware); // Usa o middleware para verificar o token
+
   io.on('connection', (socket) => {
+    // A partir daqui, o token do usuário já foi verificado
+
     socket.on('disconnect', () => {
       console.log('Socket disconnected:', socket.id);
     });
 
     socket.on('proposal', () => {
+      console.log("XXXXXXXXXXXXXXXXXXXXXXX")
       io.emit('proposal');
       // socket.broadcast.emit('proposal');
     });
