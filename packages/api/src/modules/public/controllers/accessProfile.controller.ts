@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Body, Controller, Post, Req, UseGuards, Put, Get } from '@nestjs/common';
+import { Body, Controller, Post, Req, UseGuards, Put, Get, Inject } from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiForbiddenResponse,
@@ -19,6 +19,7 @@ import { RolesGuard } from '../../../roles/role.guard';
 import { RolePermission } from '../../../roles/rolePermission.enum';
 import { Roles } from '../../../roles/role.decorator';
 import { RoleAction } from '../../../roles/roleAction.enum';
+import { MonitoringService } from '../../monitoring/monitoring.service';
 
 @ApiTags('Permissão')
 @ApiHeader({
@@ -39,6 +40,8 @@ import { RoleAction } from '../../../roles/roleAction.enum';
 @ApiBearerAuth()
 export class AccessProfileController {
   constructor(
+    @Inject(MonitoringService)
+    private readonly monitoringService: MonitoringService,
     private readonly prismaService: PrismaService,
     private readonly accesProfileService: AccessProfileService,
   ) {}
@@ -71,6 +74,8 @@ export class AccessProfileController {
         },
       },
     });
+
+    this.monitoringService.log('ERRO no access-profile/list-all');
 
     return permissions;
   }
@@ -111,6 +116,8 @@ export class AccessProfileController {
       },
     });
     const countPermissions = await this.accesProfileService.count();
+
+    this.monitoringService.log('ERRO no access-profile/list');
 
     return {
       data: permissions,
@@ -153,6 +160,8 @@ export class AccessProfileController {
       },
     });
 
+    this.monitoringService.log('ERRO no access-profile/list/:id');
+
     return permissions;
   }
 
@@ -172,6 +181,8 @@ export class AccessProfileController {
   async CountPermissions() {
     const users = await this.accesProfileService.count();
 
+    this.monitoringService.log('ERRO no access-profile/count');
+
     return users;
   }
 
@@ -189,7 +200,11 @@ export class AccessProfileController {
   // @Roles(rolePermission.Permission, [RoleAction.CREATE])
   @Post('create')
   async createPermission(@Body() model: any) {
-    return this.accesProfileService.createAccessProfile(model);
+    const data = this.accesProfileService.createAccessProfile(model);
+
+    this.monitoringService.log('ERRO no access-profile/create');
+
+    return data;
   }
 
   @Put('update')
@@ -203,6 +218,8 @@ export class AccessProfileController {
   // @Roles(rolePermission.Permission, [RoleAction.UPDATE])
   async updatePermission(@Body() model: any) {
     await this.accesProfileService.updateAccessProfile(model);
+
+    this.monitoringService.log('ERRO no access-profile/update');
   }
 
   @Put('delete')
@@ -216,5 +233,7 @@ export class AccessProfileController {
   // @Roles(rolePermission.Permission, [RoleAction.DELETE])
   async deletePermission(@Body() model: any) {
     await this.accesProfileService.deleteAccessProfile({ id: model.id });
+
+    this.monitoringService.log('ERRO no access-profile/delete');
   }
 }

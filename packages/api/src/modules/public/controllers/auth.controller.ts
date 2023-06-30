@@ -1,4 +1,4 @@
-import { Body, Controller, Ip, Post, Put, Req } from '@nestjs/common';
+import { Body, Controller, Inject, Ip, Post, Put, Req } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
   ApiBearerAuth,
@@ -16,6 +16,7 @@ import { HttpExceptionResponse } from '../../../types/classes/error.class';
 import { LoginAuthDto, RegisterAuthDto, UpdatePasswordDto } from '../../../types/dtos/auth.dto';
 import { API_VERSION_HEADER, API_VERSIONS } from '../../../utils/consts';
 import { AuthService } from '../services/auth.service';
+import { MonitoringService } from '../../monitoring/monitoring.service';
 
 @ApiTags('Autenticação')
 @ApiHeader({
@@ -29,7 +30,11 @@ import { AuthService } from '../services/auth.service';
 })
 @Throttle()
 export class AuthController {
-  constructor(private authService: AuthService) {}
+  constructor(
+    @Inject(MonitoringService)
+    private readonly monitoringService: MonitoringService,
+    private authService: AuthService
+  ) {}
 
   @Post('register')
   @ApiOperation({
@@ -51,6 +56,8 @@ export class AuthController {
     delete result.deletedAt;
     delete result.id;
 
+    this.monitoringService.log('ERRO no auth/register');
+
     return result;
   }
 
@@ -70,6 +77,9 @@ export class AuthController {
     const authUser = await this.authService.login(model);
     const token = await this.authService.createJwtToken(authUser, ip);
     // return { id: authUser.id, token };
+
+    this.monitoringService.log('ERRO no auth/login');
+
     return { id: authUser.id, token, permission: authUser?.UserPermission?.permission || null };
   }
 
@@ -88,6 +98,8 @@ export class AuthController {
   @ApiBearerAuth()
   async updatePassword(@Req() req: Request, @Body() model: UpdatePasswordDto) {
     const result = await this.authService.updatePassword(model, req.user);
+
+    this.monitoringService.log('ERRO no auth/update-password');
 
     return result;
   }

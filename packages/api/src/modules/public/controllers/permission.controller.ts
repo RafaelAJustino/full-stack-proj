@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Body, Controller, Post, Req, UseGuards, Put, Get } from '@nestjs/common';
+import { Body, Controller, Post, Req, UseGuards, Put, Get, Inject } from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiForbiddenResponse,
@@ -20,6 +20,7 @@ import { RolesGuard } from '../../../roles/role.guard';
 import { RolePermission } from '../../../roles/rolePermission.enum';
 import { Roles } from '../../../roles/role.decorator';
 import { RoleAction } from '../../../roles/roleAction.enum';
+import { MonitoringService } from '../../monitoring/monitoring.service';
 
 @ApiTags('Permissão')
 @ApiHeader({
@@ -41,6 +42,8 @@ import { RoleAction } from '../../../roles/roleAction.enum';
 @ApiBearerAuth()
 export class PermissionController {
   constructor(
+    @Inject(MonitoringService)
+    private readonly monitoringService: MonitoringService,
     private readonly prismaService: PrismaService,
     private readonly permissionService: PermissionService,
   ) {}
@@ -60,6 +63,8 @@ export class PermissionController {
   @Get('list-all')
   async getListAll() {
     const permissions = await this.prismaService.permission.findMany();
+
+    this.monitoringService.log('ERRO no permission/list-all');
 
     return permissions;
   }
@@ -88,6 +93,8 @@ export class PermissionController {
       },
     });
     const countPermissions = await this.permissionService.count();
+
+    this.monitoringService.log('ERRO no permission/list');
 
     return {
       data: permissions,
@@ -127,6 +134,8 @@ export class PermissionController {
       },
     });
 
+    this.monitoringService.log('ERRO no permission/list/:id');
+
     // const users = await this.permissionService.findOne(userId){
     //   where: { id: parseInt(req.params.id) },
     // });
@@ -150,6 +159,8 @@ export class PermissionController {
   async CountPermissions() {
     const users = await this.permissionService.count();
 
+    this.monitoringService.log('ERRO no permission/count');
+
     return users;
   }
 
@@ -167,7 +178,11 @@ export class PermissionController {
   // @Roles(rolePermission.Permission, [RoleAction.CREATE])
   @Post('create')
   async createPermission(@Body() model: any) {
-    return this.permissionService.createPermission(model);
+    const data = this.permissionService.createPermission(model);
+
+    this.monitoringService.log('ERRO no permission/create');
+
+    return data;
   }
 
   @Put('update')
@@ -181,6 +196,8 @@ export class PermissionController {
   // @Roles(rolePermission.Permission, [RoleAction.UPDATE])
   async updatePermission(@Req() req: Request, @Body() model: any) {
     await this.permissionService.updatePermission(model);
+
+    this.monitoringService.log('ERRO no permission/update');
   }
 
   @Put('delete')
@@ -194,6 +211,8 @@ export class PermissionController {
   // @Roles(rolePermission.Permission, [RoleAction.DELETE])
   async deletePermission(@Body() model: any) {
     await this.permissionService.deletePermission({ id: model.id });
+
+    this.monitoringService.log('ERRO no permission/delete');
   }
 
   // Referente a permission Profile
@@ -261,6 +280,8 @@ export class PermissionController {
     });
     const countPermissions = await this.permissionService.countPermissionProfile();
 
+    this.monitoringService.log('ERRO no permission/profile/list');
+
     return {
       data: permissions,
       page: model.page,
@@ -294,6 +315,8 @@ export class PermissionController {
       },
     });
 
+    this.monitoringService.log('ERRO no permission/profile/list/:id');
+
     return permissions;
   }
 
@@ -313,6 +336,8 @@ export class PermissionController {
   async CountPermissionProfile() {
     const users = await this.permissionService.countPermissionProfile();
 
+    this.monitoringService.log('ERRO no permission/profile/count');
+
     return users;
   }
 
@@ -330,7 +355,11 @@ export class PermissionController {
   // @Roles(rolePermission.Permission, [RoleAction.CREATE])
   @Post('profile/create')
   async createPermissionProfile(@Body() model: any) {
-    return this.permissionService.createPermissionProfile(model);
+    const data = this.permissionService.createPermissionProfile(model);
+
+    this.monitoringService.log('ERRO no permission/profile/create');
+
+    return data;
   }
 
   @Put('profile/update')
@@ -344,6 +373,8 @@ export class PermissionController {
   // @Roles(rolePermission.Permission, [RoleAction.UPDATE])
   async updatePermissionProfile(@Req() req: Request, @Body() model: any) {
     await this.permissionService.updatePermissionProfile(model);
+
+    this.monitoringService.log('ERRO no permission/profile/update');
   }
 
   @Put('profile/delete')
@@ -357,5 +388,7 @@ export class PermissionController {
   // @Roles(rolePermission.Permission, [RoleAction.DELETE])
   async deletePermissionProfile(@Body() model: any) {
     await this.permissionService.deletePermissionProfile({ id: model.id });
+
+    this.monitoringService.log('ERRO no permission/profile/delete');
   }
 }

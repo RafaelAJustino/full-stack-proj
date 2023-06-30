@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Body, Controller, Get, Post, Req, UseGuards, Put } from '@nestjs/common';
+import { Body, Controller, Get, Post, Req, UseGuards, Put, Inject } from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiForbiddenResponse,
@@ -25,6 +25,7 @@ import { RolePermission } from '../../../roles/rolePermission.enum';
 import { RoleAction } from '../../../roles/roleAction.enum';
 import { RolesGuard } from '../../../roles/role.guard';
 import { RedisService } from '../../../config/redis';
+import { MonitoringService } from '../../monitoring/monitoring.service';
 
 @ApiTags('Usuário')
 @ApiHeader({
@@ -45,6 +46,8 @@ import { RedisService } from '../../../config/redis';
 @ApiBearerAuth()
 export class PublicUserController {
   constructor(
+    @Inject(MonitoringService)
+    private readonly monitoringService: MonitoringService,
     private readonly prismaService: PrismaService,
     private readonly userService: UserService,
     private readonly redis: RedisService,
@@ -59,7 +62,11 @@ export class PublicUserController {
   })
   @Get('me')
   getMet(@Req() req: Request) {
-    return req.user;
+    const data = req.user;
+
+    this.monitoringService.log('ERRO no user/me');
+
+    return data;
   }
 
   @ApiOperation({
@@ -76,7 +83,11 @@ export class PublicUserController {
   // @Roles(rolePermission.User, [RoleAction.CREATE])
   @Post('create')
   async createUserProfile(@Body() model: UpdateUserProfileDto) {
-    return this.userService.createProfile(model);
+    const data = this.userService.createProfile(model);
+
+    this.monitoringService.log('ERRO no user/create');
+
+    return data;
   }
 
   @Put('update')
@@ -90,6 +101,8 @@ export class PublicUserController {
   // @Roles(rolePermission.User, [RoleAction.UPDATE])
   async updateUser(@Body() model: UpdateUserDto) {
     await this.userService.update(model, model.id);
+
+    this.monitoringService.log('ERRO no user/update');
   }
 
   @Put('update/status')
@@ -104,6 +117,8 @@ export class PublicUserController {
   async updateUserStatus(@Body() model: UpdateUserDto) {
     await this.redis.del(`user/${model.id}`);
     await this.userService.updateStatus(model, model.id);
+
+    this.monitoringService.log('ERRO no user/update-status');
   }
 
   @ApiOperation({
@@ -151,6 +166,8 @@ export class PublicUserController {
       },
     });
     const countUser = await this.userService.count();
+
+    this.monitoringService.log('ERRO no user/list');
 
     return {
       data: users,
@@ -202,6 +219,8 @@ export class PublicUserController {
 
       await this.redis.set(`user/${req.params.id}`, JSON.stringify(user));
 
+      this.monitoringService.log('ERRO no user/list/:id');
+
       return user;
     }
 
@@ -220,5 +239,7 @@ export class PublicUserController {
   async delteUser(@Body() model: any) {
     await this.redis.del(`user/${model.id}`);
     await this.userService.delete({ id: model.id }, model.id);
+
+    this.monitoringService.log('ERRO no user/delete');
   }
 }

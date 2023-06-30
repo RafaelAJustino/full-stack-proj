@@ -15,6 +15,7 @@ import { PermissionService } from './services/permission.service';
 import { UserService } from './services/user.service';
 import { ProposalService } from './services/proposal.service';
 import { PublicProposalController } from './controllers/proposal.controller';
+import { MonitoringService } from '../monitoring/monitoring.service';
 
 const providers = [
   AuthService,
@@ -23,6 +24,7 @@ const providers = [
   AccessProfileService,
   ProposalService,
   RedisService,
+  MonitoringService,
 ];
 const controllers = [
   PublicUserController,

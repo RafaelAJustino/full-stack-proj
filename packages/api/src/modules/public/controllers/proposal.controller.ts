@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Body, Controller, Get, Post, Req, UseGuards, Put } from '@nestjs/common';
+import { Body, Controller, Get, Post, Req, UseGuards, Put, Inject } from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiForbiddenResponse,
@@ -21,6 +21,7 @@ import { RoleAction } from '../../../roles/roleAction.enum';
 import { RolesGuard } from '../../../roles/role.guard';
 import { ProposalService } from '../services/proposal.service';
 import { ProposalDto } from '../../../types/dtos/proposal.dto';
+import { MonitoringService } from '../../monitoring/monitoring.service';
 
 @ApiTags('Propostas')
 @ApiHeader({
@@ -41,6 +42,8 @@ import { ProposalDto } from '../../../types/dtos/proposal.dto';
 @ApiBearerAuth()
 export class PublicProposalController {
   constructor(
+    @Inject(MonitoringService)
+    private readonly monitoringService: MonitoringService,
     private readonly prismaService: PrismaService,
     private readonly proposalService: ProposalService,
   ) {}
@@ -56,6 +59,8 @@ export class PublicProposalController {
   // @Roles(rolePermission.Proposal, [RoleAction.UPDATE])
   async updateProposal(@Body() model: ProposalDto) {
     await this.proposalService.update(model, model.id);
+
+    this.monitoringService.log('ERRO no proposal/update');
   }
 
   @ApiOperation({
@@ -111,6 +116,8 @@ export class PublicProposalController {
     });
     const countProposals = await this.proposalService.count();
 
+    this.monitoringService.log('ERRO no proposal/list');
+
     return {
       data: proposals,
       page: model.page,
@@ -140,6 +147,8 @@ export class PublicProposalController {
       },
     });
 
+    this.monitoringService.log('ERRO no proposal/list/:id');
+
     return proposals;
   }
 
@@ -157,7 +166,11 @@ export class PublicProposalController {
   // @Roles(rolePermission.Proposal, [RoleAction.CREATE])
   @Post('create')
   async createUserProfile(@Body() model: ProposalDto) {
-    return this.proposalService.create(model, model.clientId);
+    const data = this.proposalService.create(model, model.clientId);
+
+    this.monitoringService.log('ERRO no proposal/create');
+
+    return data;
   }
 
   @Put('delete')
@@ -171,5 +184,7 @@ export class PublicProposalController {
   // @Roles(rolePermission.Proposal, [RoleAction.DELETE])
   async delteProposal(@Body() model: any) {
     await this.proposalService.delete({ id: model.id });
+
+    this.monitoringService.log('ERRO no proposal/delete');
   }
 }
