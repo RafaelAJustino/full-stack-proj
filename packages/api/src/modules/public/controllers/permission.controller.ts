@@ -21,6 +21,7 @@ import { RolePermission } from '../../../roles/rolePermission.enum';
 import { Roles } from '../../../roles/role.decorator';
 import { RoleAction } from '../../../roles/roleAction.enum';
 import { MonitoringService } from '../../monitoring/monitoring.service';
+import { RedisService } from '../../../config/redis';
 
 @ApiTags('Permissão')
 @ApiHeader({
@@ -46,7 +47,8 @@ export class PermissionController {
     private readonly monitoringService: MonitoringService,
     private readonly prismaService: PrismaService,
     private readonly permissionService: PermissionService,
-  ) {}
+    private readonly redis: RedisService,
+  ) { }
 
   @ApiOperation({
     summary: 'lista todas as permissões',
@@ -62,11 +64,21 @@ export class PermissionController {
   // @Roles(rolePermission.Permission, [RoleAction.READ])
   @Get('list-all')
   async getListAll() {
-    const permissions = await this.prismaService.permission.findMany();
 
-    this.monitoringService.log('ERRO no permission/list-all');
+    const cachedPermission = await this.redis.get(`permission/list-all`);
 
-    return permissions;
+    if (!cachedPermission) {
+      const permissions = await this.prismaService.permission.findMany();
+
+      this.monitoringService.log('ERRO no permission/list-all');
+
+      await this.redis.set(`permission/list-all`, JSON.stringify(permissions));
+
+      return permissions;
+    }
+
+    return JSON.parse(cachedPermission);
+
   }
 
   @ApiOperation({
@@ -83,25 +95,42 @@ export class PermissionController {
   // @Roles(rolePermission.Permission, [RoleAction.READ])
   @Post('list')
   async getList(@Body() model: PaginatedDto) {
-    const permissions = await this.prismaService.permission.findMany({
-      skip: (model.page - 1) * model.perPage,
-      take: model.perPage,
-      where: {
-        name: {
-          contains: model.search,
+    const skip = (model.page - 1) * model.perPage;
+    const take = model.perPage;
+
+    const cachedPermission = await this.redis.get(`permission/list/${skip}-${take}`);
+
+    if (!cachedPermission) {
+      const permissions = await this.prismaService.permission.findMany({
+        skip: skip,
+        take: take,
+        where: {
+          name: {
+            contains: model.search,
+          },
         },
-      },
-    });
-    const countPermissions = await this.permissionService.count();
+      });
+      const countPermissions = await this.permissionService.count();
 
-    this.monitoringService.log('ERRO no permission/list');
+      this.monitoringService.log('ERRO no permission/list');
 
-    return {
-      data: permissions,
-      page: model.page,
-      perPage: model.perPage,
-      total: countPermissions,
-    };
+      await this.redis.set(`permission/list/${skip}-${take}`, JSON.stringify({
+        data: permissions,
+        page: model.page,
+        perPage: model.perPage,
+        total: countPermissions,
+      }));
+
+      return {
+        data: permissions,
+        page: model.page,
+        perPage: model.perPage,
+        total: countPermissions,
+      };
+
+    }
+    return JSON.parse(cachedPermission);
+
   }
 
   @ApiOperation({
@@ -119,28 +148,36 @@ export class PermissionController {
   @Get('list/:id')
   async getOnePermission(@Req() req: any) {
     const id = req.params.id;
-    const permissions = await this.prismaService.permission.findMany({
-      include: {
-        permissionProfile: {
-          include: {
-            permission: true,
+
+    const cachedPermission = await this.redis.get(`permission/list/${id}`);
+    if (!cachedPermission) {
+      const permissions = await this.prismaService.permission.findMany({
+        include: {
+          permissionProfile: {
+            include: {
+              permission: true,
+            },
           },
         },
-      },
-      where: {
-        id: {
-          equals: id,
+        where: {
+          id: {
+            equals: id,
+          },
         },
-      },
-    });
+      });
 
-    this.monitoringService.log('ERRO no permission/list/:id');
+      this.monitoringService.log('ERRO no permission/list/:id');
 
-    // const users = await this.permissionService.findOne(userId){
-    //   where: { id: parseInt(req.params.id) },
-    // });
+      // const users = await this.permissionService.findOne(userId){
+      //   where: { id: parseInt(req.params.id) },
+      // });
+      await this.redis.set(`permission/list/${id}`, JSON.stringify(permissions));
 
-    return permissions;
+
+      return permissions;
+    }
+    return JSON.parse(cachedPermission);
+
   }
 
   @ApiOperation({
@@ -196,7 +233,8 @@ export class PermissionController {
   // @Roles(rolePermission.Permission, [RoleAction.UPDATE])
   async updatePermission(@Req() req: Request, @Body() model: any) {
     await this.permissionService.updatePermission(model);
-
+    await this.redis.del(`permission/list/${model.id}`);
+    await this.redis.del(`permission/list-all`);
     this.monitoringService.log('ERRO no permission/update');
   }
 
@@ -211,7 +249,8 @@ export class PermissionController {
   // @Roles(rolePermission.Permission, [RoleAction.DELETE])
   async deletePermission(@Body() model: any) {
     await this.permissionService.deletePermission({ id: model.id });
-
+    await this.redis.del(`permission/list/${model.id}`);
+    await this.redis.del(`permission/list-all/${model.id}`);
     this.monitoringService.log('ERRO no permission/delete');
   }
 
@@ -231,6 +270,10 @@ export class PermissionController {
   // @Roles(rolePermission.Permission, [RoleAction.READ])
   @Get('profile/list-all')
   async getListAllPermissionProfile() {
+
+    const cachedAccessProfile = await this.redis.get(`access-profile/list-all`);
+
+    if(!cachedAccessProfile){
     const permissions = await this.prismaService.permissionProfile.findMany({
       include: {
         accessProfile: true,
@@ -238,7 +281,12 @@ export class PermissionController {
       },
     });
 
+    await this.redis.set(`access-profile/list-all`, JSON.stringify(permissions));
+
     return permissions;
+    }
+    return JSON.parse(cachedAccessProfile);
+
   }
 
   @ApiOperation({
@@ -305,19 +353,26 @@ export class PermissionController {
   @Get('profile/list/:id')
   async getOnePermissionProfile(@Req() req: any) {
     const id = req.params.id;
-    const permissions = await this.prismaService.permissionProfile.findUnique({
-      where: {
-        id: parseInt(id),
-      },
-      include: {
-        accessProfile: true,
-        permission: true,
-      },
-    });
 
-    this.monitoringService.log('ERRO no permission/profile/list/:id');
+    const cachedPermissionProfile = await this.redis.get(`permission-profile/list/${id}`);
+    if (!cachedPermissionProfile) {
+      const permissions = await this.prismaService.permissionProfile.findUnique({
+        where: {
+          id: parseInt(id),
+        },
+        include: {
+          accessProfile: true,
+          permission: true,
+        },
+      });
 
-    return permissions;
+      this.monitoringService.log('ERRO no permission/profile/list/:id');
+
+      await this.redis.set(`permission-profile/list/${id}`, JSON.stringify(permissions));
+
+      return permissions;
+    }
+    return JSON.parse(cachedAccessProfile);
   }
 
   @ApiOperation({
@@ -373,7 +428,8 @@ export class PermissionController {
   // @Roles(rolePermission.Permission, [RoleAction.UPDATE])
   async updatePermissionProfile(@Req() req: Request, @Body() model: any) {
     await this.permissionService.updatePermissionProfile(model);
-
+    await this.redis.del(`permission/profile/list/${model.id}`);
+    await this.redis.del(`permission/profile/list-all`);
     this.monitoringService.log('ERRO no permission/profile/update');
   }
 
@@ -388,7 +444,8 @@ export class PermissionController {
   // @Roles(rolePermission.Permission, [RoleAction.DELETE])
   async deletePermissionProfile(@Body() model: any) {
     await this.permissionService.deletePermissionProfile({ id: model.id });
-
+    await this.redis.del(`permission/profile/list/${model.id}`);
+    await this.redis.del(`permission/profile/list-all`);
     this.monitoringService.log('ERRO no permission/profile/delete');
   }
 }

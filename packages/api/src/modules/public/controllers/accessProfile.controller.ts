@@ -104,37 +104,53 @@ export class AccessProfileController {
   // @Roles(rolePermission.Permission, [RoleAction.READ])
   @Post('list')
   async getList(@Body() model: PaginatedDto) {
-    const permissions = await this.prismaService.accessProfile.findMany({
-      skip: (model.page - 1) * model.perPage,
-      take: model.perPage,
-      where: {
-        name: {
-          contains: model.search,
-        },
-      },
-      include: {
-        permissionProfile: {
-          include: {
-            permission: true,
+    const skip = (model.page - 1) * model.perPage;
+    const take = model.perPage;
+    const cachedAccessProfile = await this.redis.get(`access-profile/list/${skip}-${take}`);
+
+    if (!cachedAccessProfile) {
+      const permissions = await this.prismaService.accessProfile.findMany({
+        skip: skip,
+        take: take,
+        where: {
+          name: {
+            contains: model.search,
           },
         },
-        accessProfileUser: {
-          include: {
-            user: true,
+        include: {
+          permissionProfile: {
+            include: {
+              permission: true,
+            },
+          },
+          accessProfileUser: {
+            include: {
+              user: true,
+            },
           },
         },
-      },
-    });
-    const countPermissions = await this.accesProfileService.count();
+      });
+      const countPermissions = await this.accesProfileService.count();
 
-    this.monitoringService.log('ERRO no access-profile/list');
+      this.monitoringService.log('ERRO no access-profile/list');
 
-    return {
-      data: permissions,
-      page: model.page,
-      perPage: model.perPage,
-      total: countPermissions,
-    };
+      await this.redis.set(`access-profile/list/${skip}-${take}`, JSON.stringify({
+        data: permissions,
+        page: model.page,
+        perPage: model.perPage,
+        total: countPermissions,
+      }));
+
+      return {
+        data: permissions,
+        page: model.page,
+        perPage: model.perPage,
+        total: countPermissions,
+      };
+
+    }
+    return JSON.parse(cachedAccessProfile);
+
   }
 
   @ApiOperation({
@@ -154,31 +170,31 @@ export class AccessProfileController {
     const id = req.params.id;
 
     const cachedAccessProfile = await this.redis.get(`access-profile/list/${id}`);
-    
-    if (!cachedUser) {
-    const permissions = await this.prismaService.accessProfile.findUnique({
-      include: {
-        permissionProfile: {
-          include: {
-            permission: true,
+
+    if (!cachedAccessProfile) {
+      const permissions = await this.prismaService.accessProfile.findUnique({
+        include: {
+          permissionProfile: {
+            include: {
+              permission: true,
+            },
+          },
+          accessProfileUser: {
+            include: {
+              user: true,
+            },
           },
         },
-        accessProfileUser: {
-          include: {
-            user: true,
-          },
+        where: {
+          id: parseInt(id),
         },
-      },
-      where: {
-        id: parseInt(id),
-      },
-    });
+      });
 
-    this.monitoringService.log('ERRO no access-profile/list/:id');
+      this.monitoringService.log('ERRO no access-profile/list/:id');
 
-    await this.redis.set(`access-profile/list/${id}`, JSON.stringify(permissions));
+      await this.redis.set(`access-profile/list/${id}`, JSON.stringify(permissions));
 
-    return permissions;
+      return permissions;
 
     }
     return JSON.parse(cachedAccessProfile);
@@ -238,7 +254,7 @@ export class AccessProfileController {
   async updatePermission(@Body() model: any) {
     await this.accesProfileService.updateAccessProfile(model);
     await this.redis.del(`access-profile/list/${model.id}`);
-    await this.redis.del(`access-profile/list-all/${model.id}`);
+    await this.redis.del(`access-profile/list-all`);
     this.monitoringService.log('ERRO no access-profile/update');
   }
 
@@ -254,7 +270,7 @@ export class AccessProfileController {
   async deletePermission(@Body() model: any) {
     await this.accesProfileService.deleteAccessProfile({ id: model.id });
     await this.redis.del(`access-profile/list/${model.id}`);
-    await this.redis.del(`access-profile/list-all/${model.id}`);
+    await this.redis.del(`access-profile/list-all`);
     this.monitoringService.log('ERRO no access-profile/delete');
   }
 }
