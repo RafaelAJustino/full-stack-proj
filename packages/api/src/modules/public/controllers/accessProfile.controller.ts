@@ -46,7 +46,7 @@ export class AccessProfileController {
     private readonly prismaService: PrismaService,
     private readonly accesProfileService: AccessProfileService,
     private readonly redis: RedisService,
-  ) { }
+  ) {}
 
   @ApiOperation({
     summary: 'lista todos os perfis',
@@ -64,7 +64,7 @@ export class AccessProfileController {
   async getListAll() {
     const cachedAccessProfile = await this.redis.get(`access-profile/list-all`);
 
-    if (!cachedAcessProfile) {
+    if (!cachedAccessProfile) {
       const permissions = await this.prismaService.accessProfile.findMany({
         include: {
           permissionProfile: {
@@ -134,12 +134,15 @@ export class AccessProfileController {
 
       this.monitoringService.log('ERRO no access-profile/list');
 
-      await this.redis.set(`access-profile/list/${skip}-${take}`, JSON.stringify({
-        data: permissions,
-        page: model.page,
-        perPage: model.perPage,
-        total: countPermissions,
-      }));
+      await this.redis.set(
+        `access-profile/list/${skip}-${take}`,
+        JSON.stringify({
+          data: permissions,
+          page: model.page,
+          perPage: model.perPage,
+          total: countPermissions,
+        }),
+      );
 
       return {
         data: permissions,
@@ -147,10 +150,8 @@ export class AccessProfileController {
         perPage: model.perPage,
         total: countPermissions,
       };
-
     }
     return JSON.parse(cachedAccessProfile);
-
   }
 
   @ApiOperation({
@@ -195,7 +196,6 @@ export class AccessProfileController {
       await this.redis.set(`access-profile/list/${id}`, JSON.stringify(permissions));
 
       return permissions;
-
     }
     return JSON.parse(cachedAccessProfile);
   }

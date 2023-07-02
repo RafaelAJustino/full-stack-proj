@@ -107,7 +107,6 @@ async function bootstrap() {
     });
 
     socket.on('proposal', () => {
-      console.log("XXXXXXXXXXXXXXXXXXXXXXX")
       io.emit('proposal');
       // socket.broadcast.emit('proposal');
     });

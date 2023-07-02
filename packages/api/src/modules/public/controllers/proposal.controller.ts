@@ -48,7 +48,7 @@ export class PublicProposalController {
     private readonly prismaService: PrismaService,
     private readonly proposalService: ProposalService,
     private readonly redis: RedisService,
-  ) { }
+  ) {}
 
   @Put('update')
   @ApiOperation({
@@ -125,12 +125,15 @@ export class PublicProposalController {
 
       this.monitoringService.log('ERRO no proposal/list');
 
-      await this.redis.set(`proposal/list/${skip}-${take}`, JSON.stringify({
-        data: proposals,
-        page: model.page,
-        perPage: model.perPage,
-        total: countProposals,
-      }));
+      await this.redis.set(
+        `proposal/list/${skip}-${take}`,
+        JSON.stringify({
+          data: proposals,
+          page: model.page,
+          perPage: model.perPage,
+          total: countProposals,
+        }),
+      );
 
       return {
         data: proposals,
@@ -138,10 +141,8 @@ export class PublicProposalController {
         perPage: model.perPage,
         total: countProposals,
       };
-
     }
     return JSON.parse(cachedAccessProfile);
-
   }
 
   @ApiOperation({
@@ -159,19 +160,19 @@ export class PublicProposalController {
   @Get('list/:id')
   async getOneProposal(@Req() req: any) {
     const cachedProposal = await this.redis.get(`access-profile/list/${id}`);
-    if(!cachedProposal){
-    const proposals = await this.proposalService.findOne({
-      where: { id: parseInt(req.params.id) },
-      include: {
-        client: true,
-      },
-    });
+    if (!cachedProposal) {
+      const proposals = await this.proposalService.findOne({
+        where: { id: parseInt(req.params.id) },
+        include: {
+          client: true,
+        },
+      });
 
-    this.monitoringService.log('ERRO no proposal/list/:id');
+      this.monitoringService.log('ERRO no proposal/list/:id');
 
-    await this.redis.set(`access-profile/list/${id}`, JSON.stringify(proposals));
+      await this.redis.set(`access-profile/list/${id}`, JSON.stringify(proposals));
 
-    return proposals;
+      return proposals;
     }
     return JSON.parse(cachedProposal);
   }

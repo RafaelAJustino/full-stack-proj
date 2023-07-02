@@ -48,7 +48,7 @@ export class PermissionController {
     private readonly prismaService: PrismaService,
     private readonly permissionService: PermissionService,
     private readonly redis: RedisService,
-  ) { }
+  ) {}
 
   @ApiOperation({
     summary: 'lista todas as permissões',
@@ -64,7 +64,6 @@ export class PermissionController {
   // @Roles(rolePermission.Permission, [RoleAction.READ])
   @Get('list-all')
   async getListAll() {
-
     const cachedPermission = await this.redis.get(`permission/list-all`);
 
     if (!cachedPermission) {
@@ -78,7 +77,6 @@ export class PermissionController {
     }
 
     return JSON.parse(cachedPermission);
-
   }
 
   @ApiOperation({
@@ -114,12 +112,15 @@ export class PermissionController {
 
       this.monitoringService.log('ERRO no permission/list');
 
-      await this.redis.set(`permission/list/${skip}-${take}`, JSON.stringify({
-        data: permissions,
-        page: model.page,
-        perPage: model.perPage,
-        total: countPermissions,
-      }));
+      await this.redis.set(
+        `permission/list/${skip}-${take}`,
+        JSON.stringify({
+          data: permissions,
+          page: model.page,
+          perPage: model.perPage,
+          total: countPermissions,
+        }),
+      );
 
       return {
         data: permissions,
@@ -127,10 +128,8 @@ export class PermissionController {
         perPage: model.perPage,
         total: countPermissions,
       };
-
     }
     return JSON.parse(cachedPermission);
-
   }
 
   @ApiOperation({
@@ -173,11 +172,9 @@ export class PermissionController {
       // });
       await this.redis.set(`permission/list/${id}`, JSON.stringify(permissions));
 
-
       return permissions;
     }
     return JSON.parse(cachedPermission);
-
   }
 
   @ApiOperation({
@@ -270,23 +267,21 @@ export class PermissionController {
   // @Roles(rolePermission.Permission, [RoleAction.READ])
   @Get('profile/list-all')
   async getListAllPermissionProfile() {
-
     const cachedAccessProfile = await this.redis.get(`access-profile/list-all`);
 
-    if(!cachedAccessProfile){
-    const permissions = await this.prismaService.permissionProfile.findMany({
-      include: {
-        accessProfile: true,
-        permission: true,
-      },
-    });
+    if (!cachedAccessProfile) {
+      const permissions = await this.prismaService.permissionProfile.findMany({
+        include: {
+          accessProfile: true,
+          permission: true,
+        },
+      });
 
-    await this.redis.set(`access-profile/list-all`, JSON.stringify(permissions));
+      await this.redis.set(`access-profile/list-all`, JSON.stringify(permissions));
 
-    return permissions;
+      return permissions;
     }
     return JSON.parse(cachedAccessProfile);
-
   }
 
   @ApiOperation({
@@ -372,7 +367,7 @@ export class PermissionController {
 
       return permissions;
     }
-    return JSON.parse(cachedAccessProfile);
+    return JSON.parse(cachedPermissionProfile);
   }
 
   @ApiOperation({

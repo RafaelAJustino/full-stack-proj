@@ -1,5 +1,5 @@
-import { Proposal } from './proposal';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { Proposal } from './proposal';
 
 export class Client {
   @ApiProperty({ type: Number })

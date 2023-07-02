@@ -33,7 +33,7 @@ export class AuthController {
   constructor(
     @Inject(MonitoringService)
     private readonly monitoringService: MonitoringService,
-    private authService: AuthService
+    private authService: AuthService,
   ) {}
 
   @Post('register')

@@ -3,6 +3,7 @@ import { APP_GUARD } from '@nestjs/core';
 import JWTMiddleware from '../../middlewares/jwt.middleware';
 import { ExternalModule } from '../external/external.module';
 import { RedisService } from '../../config/redis';
+import { MonitoringService } from '../monitoring/monitoring.service';
 import { AccessProfileController } from './controllers/accessProfile.controller';
 import { AuthController } from './controllers/auth.controller';
 import { PermissionController } from './controllers/permission.controller';
@@ -15,7 +16,6 @@ import { PermissionService } from './services/permission.service';
 import { UserService } from './services/user.service';
 import { ProposalService } from './services/proposal.service';
 import { PublicProposalController } from './controllers/proposal.controller';
-import { MonitoringService } from '../monitoring/monitoring.service';
 
 const providers = [
   AuthService,

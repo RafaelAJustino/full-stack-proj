@@ -136,46 +136,61 @@ export class PublicUserController {
   // @Roles(rolePermission.User, [RoleAction.READ])
   @Post('list')
   async getList(@Body() model: PaginatedDto) {
-    const users = await this.prismaService.user.findMany({
-      skip: (model.page - 1) * model.perPage,
-      take: model.perPage,
-      include: {
-        profile: true,
-      },
-      where: {
-        OR: [
-          {
-            profile: {
-              firstName: {
+    const cachedUser = await this.redis.get(`user/list`);
+
+    if (!cachedUser) {
+      const users = await this.prismaService.user.findMany({
+        skip: (model.page - 1) * model.perPage,
+        take: model.perPage,
+        include: {
+          profile: true,
+        },
+        where: {
+          OR: [
+            {
+              profile: {
+                firstName: {
+                  contains: model.search,
+                },
+              },
+            },
+            {
+              profile: {
+                lastName: {
+                  contains: model.search,
+                },
+              },
+            },
+            {
+              email: {
                 contains: model.search,
               },
             },
-          },
-          {
-            profile: {
-              lastName: {
-                contains: model.search,
-              },
-            },
-          },
-          {
-            email: {
-              contains: model.search,
-            },
-          },
-        ],
-      },
-    });
-    const countUser = await this.userService.count();
+          ],
+        },
+      });
+      const countUser = await this.userService.count();
 
-    this.monitoringService.log('ERRO no user/list');
+      this.monitoringService.log('ERRO no user/list');
 
-    return {
-      data: users,
-      page: model.page,
-      perPage: model.perPage,
-      total: countUser,
-    };
+      await this.redis.set(
+        `user/list`,
+        JSON.stringify({
+          data: users,
+          page: model.page,
+          perPage: model.perPage,
+          total: countUser,
+        }),
+      );
+
+      return {
+        data: users,
+        page: model.page,
+        perPage: model.perPage,
+        total: countUser,
+      };
+    }
+    return JSON.parse(cachedUser);
   }
 
   @ApiOperation({
