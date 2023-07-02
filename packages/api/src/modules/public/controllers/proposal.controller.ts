@@ -22,6 +22,7 @@ import { RolesGuard } from '../../../roles/role.guard';
 import { ProposalService } from '../services/proposal.service';
 import { ProposalDto } from '../../../types/dtos/proposal.dto';
 import { MonitoringService } from '../../monitoring/monitoring.service';
+import { RedisService } from '../../../config/redis';
 
 @ApiTags('Propostas')
 @ApiHeader({
@@ -46,7 +47,8 @@ export class PublicProposalController {
     private readonly monitoringService: MonitoringService,
     private readonly prismaService: PrismaService,
     private readonly proposalService: ProposalService,
-  ) {}
+    private readonly redis: RedisService,
+  ) { }
 
   @Put('update')
   @ApiOperation({
@@ -77,53 +79,69 @@ export class PublicProposalController {
   // @Roles(rolePermission.Proposal, [RoleAction.READ])
   @Post('list')
   async getList(@Body() model: PaginatedDto) {
-    const proposals = await this.prismaService.proposal.findMany({
-      skip: (model.page - 1) * model.perPage,
-      take: model.perPage,
-      include: {
-        client: true,
-      },
-      where: {
-        OR: [
-          {
-            client: {
+    const skip = (model.page - 1) * model.perPage;
+    const take = model.perPage;
+
+    const cachedProposal = await this.redis.get(`proposal/list/${skip}-${take}`);
+    if (!cachedProposal) {
+      const proposals = await this.prismaService.proposal.findMany({
+        skip: (model.page - 1) * model.perPage,
+        take: model.perPage,
+        include: {
+          client: true,
+        },
+        where: {
+          OR: [
+            {
+              client: {
+                name: {
+                  contains: model.search,
+                },
+              },
+            },
+            {
+              client: {
+                document: {
+                  contains: model.search,
+                },
+              },
+            },
+            {
+              client: {
+                contact: {
+                  contains: model.search,
+                },
+              },
+            },
+            {
               name: {
                 contains: model.search,
               },
             },
-          },
-          {
-            client: {
-              document: {
-                contains: model.search,
-              },
-            },
-          },
-          {
-            client: {
-              contact: {
-                contains: model.search,
-              },
-            },
-          },
-          {
-            name: {
-              contains: model.search,
-            },
-          },
-        ],
-      },
-    });
-    const countProposals = await this.proposalService.count();
+          ],
+        },
+      });
+      const countProposals = await this.proposalService.count();
 
-    this.monitoringService.log('ERRO no proposal/list');
+      this.monitoringService.log('ERRO no proposal/list');
 
-    return {
-      data: proposals,
-      page: model.page,
-      perPage: model.perPage,
-      total: countProposals,
-    };
+      await this.redis.set(`proposal/list/${skip}-${take}`, JSON.stringify({
+        data: proposals,
+        page: model.page,
+        perPage: model.perPage,
+        total: countProposals,
+      }));
+
+      return {
+        data: proposals,
+        page: model.page,
+        perPage: model.perPage,
+        total: countProposals,
+      };
+
+    }
+    return JSON.parse(cachedAccessProfile);
+
   }
 
   @ApiOperation({
@@ -140,6 +158,8 @@ export class PublicProposalController {
   // @Roles(rolePermission.Proposal, [RoleAction.READ])
   @Get('list/:id')
   async getOneProposal(@Req() req: any) {
+    const cachedProposal = await this.redis.get(`access-profile/list/${id}`);
+    if(!cachedProposal){
     const proposals = await this.proposalService.findOne({
       where: { id: parseInt(req.params.id) },
       include: {
@@ -149,7 +169,11 @@ export class PublicProposalController {
 
     this.monitoringService.log('ERRO no proposal/list/:id');
 
+    await this.redis.set(`access-profile/list/${id}`, JSON.stringify(proposals));
+
     return proposals;
+    }
+    return JSON.parse(cachedProposal);
   }
 
   @ApiOperation({
@@ -184,7 +208,7 @@ export class PublicProposalController {
   // @Roles(rolePermission.Proposal, [RoleAction.DELETE])
   async delteProposal(@Body() model: any) {
     await this.proposalService.delete({ id: model.id });
-
+    await this.redis.del(`access-profile/list/${model.id}`);
     this.monitoringService.log('ERRO no proposal/delete');
   }
 }
