@@ -20,6 +20,7 @@ import { RolePermission } from '../../../roles/rolePermission.enum';
 import { Roles } from '../../../roles/role.decorator';
 import { RoleAction } from '../../../roles/roleAction.enum';
 import { MonitoringService } from '../../monitoring/monitoring.service';
+import { RedisService } from '../../../config/redis';
 
 @ApiTags('Permissão')
 @ApiHeader({
@@ -44,7 +45,8 @@ export class AccessProfileController {
     private readonly monitoringService: MonitoringService,
     private readonly prismaService: PrismaService,
     private readonly accesProfileService: AccessProfileService,
-  ) {}
+    private readonly redis: RedisService,
+  ) { }
 
   @ApiOperation({
     summary: 'lista todos os perfis',
@@ -60,24 +62,32 @@ export class AccessProfileController {
   // @Roles(rolePermission.Permission, [RoleAction.READ])
   @Get('list-all')
   async getListAll() {
-    const permissions = await this.prismaService.accessProfile.findMany({
-      include: {
-        permissionProfile: {
-          include: {
-            permission: true,
+    const cachedAccessProfile = await this.redis.get(`access-profile/list-all`);
+
+    if (!cachedAcessProfile) {
+      const permissions = await this.prismaService.accessProfile.findMany({
+        include: {
+          permissionProfile: {
+            include: {
+              permission: true,
+            },
+          },
+          accessProfileUser: {
+            include: {
+              user: true,
+            },
           },
         },
-        accessProfileUser: {
-          include: {
-            user: true,
-          },
-        },
-      },
-    });
+      });
 
-    this.monitoringService.log('ERRO no access-profile/list-all');
+      this.monitoringService.log('ERRO no access-profile/list-all');
 
-    return permissions;
+      await this.redis.set(`access-profile/list-all`, JSON.stringify(permissions));
+
+      return permissions;
+    }
+
+    return JSON.parse(cachedAccessProfile);
   }
 
   @ApiOperation({
@@ -142,6 +152,10 @@ export class AccessProfileController {
   @Get('list/:id')
   async getOnePermission(@Req() req: any) {
     const id = req.params.id;
+
+    const cachedAccessProfile = await this.redis.get(`access-profile/list/${id}`);
+    
+    if (!cachedUser) {
     const permissions = await this.prismaService.accessProfile.findUnique({
       include: {
         permissionProfile: {
@@ -162,7 +176,12 @@ export class AccessProfileController {
 
     this.monitoringService.log('ERRO no access-profile/list/:id');
 
+    await this.redis.set(`access-profile/list/${id}`, JSON.stringify(permissions));
+
     return permissions;
+
+    }
+    return JSON.parse(cachedAccessProfile);
   }
 
   @ApiOperation({
@@ -218,7 +237,8 @@ export class AccessProfileController {
   // @Roles(rolePermission.Permission, [RoleAction.UPDATE])
   async updatePermission(@Body() model: any) {
     await this.accesProfileService.updateAccessProfile(model);
-
+    await this.redis.del(`access-profile/list/${model.id}`);
+    await this.redis.del(`access-profile/list-all/${model.id}`);
     this.monitoringService.log('ERRO no access-profile/update');
   }
 
@@ -233,7 +253,8 @@ export class AccessProfileController {
   // @Roles(rolePermission.Permission, [RoleAction.DELETE])
   async deletePermission(@Body() model: any) {
     await this.accesProfileService.deleteAccessProfile({ id: model.id });
-
+    await this.redis.del(`access-profile/list/${model.id}`);
+    await this.redis.del(`access-profile/list-all/${model.id}`);
     this.monitoringService.log('ERRO no access-profile/delete');
   }
 }

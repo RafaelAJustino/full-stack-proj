@@ -100,6 +100,7 @@ export class PublicUserController {
   @UseGuards(RolesGuard)
   // @Roles(rolePermission.User, [RoleAction.UPDATE])
   async updateUser(@Body() model: UpdateUserDto) {
+    await this.redis.del(`user/${model.id}`);
     await this.userService.update(model, model.id);
 
     this.monitoringService.log('ERRO no user/update');
